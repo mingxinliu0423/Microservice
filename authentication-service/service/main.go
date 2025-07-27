@@ -19,34 +19,41 @@ const webPort = "80"
 var counts int64
 
 type Config struct {
-	DB	   	*sql.DB
-	Models  data.Models
+	DB     *sql.DB
+	Models data.Models
 }
 
 func main() {
-	log.Println("Starting authentication service...")
+	log.Println("Starting authentication service")
 
-	conn := connectTODB()
+	// TODO connect to DB
+
+	// Connect to the database
+	conn := connectToDB()
 	if conn == nil {
 		log.Panic("Can't connect to Postgres!")
 	}
+
+	// set up config
+	// Set up config
 	app := Config{
-		DB:		conn,
+		DB:     conn,
 		Models: data.New(conn),
 	}
 
 	srv := &http.Server{
-		Addr:		fmt.Sprintf(":%s", webPort)
-		Handler:	app.rountes()
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(),
 	}
 
 	err := srv.ListenAndServe()
 	if err != nil {
 		log.Panic(err)
 	}
+
 }
 
-
+// openDB opens a database connection using the provided data source name (DSN).
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
@@ -61,8 +68,11 @@ func openDB(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
+// connectToDB attempts to connect to the database using the environment variable DSN.
+// It retries the connection every two seconds until it succeeds or exceeds 10 attempts.
 func connectToDB() *sql.DB {
 	dsn := os.Getenv("DSN")
+	// dsn := "postgres://postgres:password@localhost:5432/users?sslmode=disable"
 
 	for {
 		connection, err := openDB(dsn)
@@ -70,7 +80,7 @@ func connectToDB() *sql.DB {
 			log.Println("Postgres not yet ready ...")
 			counts++
 		} else {
-			log.Println("Connected to Postgres")
+			log.Println("Connected to Postgres!")
 			return connection
 		}
 

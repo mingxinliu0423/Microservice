@@ -1,7 +1,9 @@
 # Define the binaries for the front end and broker
 FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
-
+AUTH_BINARY=authApp
+LOGGER_BINARY=loggerApp
+MAIL_BINARY=mailApp
 
 ## start-containers: starts all containers in the background without forcing build
 start-containers:
@@ -18,7 +20,7 @@ stop-containers:
 
 
 ## rebuild-containers: stops docker-compose (if running), builds all projects and starts docker compose
-rebuild-containers: build-broker
+rebuild-containers: build-broker build-auth build-logger build-mail
 	@echo "Stopping docker images (if running...)"
 	docker-compose down
 	@echo "Building (when required) and starting docker images..."
@@ -35,7 +37,22 @@ build-broker:
 	@echo "Done!"
 
 
+## build-auth: builds the auth binary as a linux executable
+build-auth:
+	@echo "Building auth binary..."
+	cd ../authentication-service && env GOOS=linux CGO_ENABLED=0 go build -o ${AUTH_BINARY} ./service
+	@echo "Done!"
 
+## build-logger: builds the logger binary as a Linux executable
+build-logger:
+	@echo "Building logger binary..."
+	cd ../logger-service && env GOOS=linux CGO_ENABLED=0 go build -o ${LOGGER_BINARY} ./service
+	@echo "Done!"
+
+build-mail:
+	@echo "Building mail binary..."
+	cd ../mail-service && env GOOS=linux CGO_ENABLED=0 go build -o ${MAIL_BINARY} ./service
+	@echo "Done!"
 
 ## build-front: builds the front end binary
 build-front:

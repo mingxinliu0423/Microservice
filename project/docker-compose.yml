@@ -1,11 +1,74 @@
 services:
-
   # Define a service for the broker
   broker-service:
     # Build the broker service using the specified Dockerfile
     build:
-      context: ./../broker-service  # Set the build context to the broker service directory
-      dockerfile: ./../broker-service/broker-service.dockerfile  # Specify the path to the Dockerfile
-    restart: always  # Always restart the service if it stops
+      context: ./../broker-service # Set the build context to the broker service directory
+      dockerfile: ./../broker-service/broker-service.dockerfile # Specify the path to the Dockerfile
+    restart: always # Always restart the service if it stops
     ports:
-      - "8080:80"  # Map port 8080 on the host to port 80 in the container
+      - "8080:80" # Map port 8080 on the host to port 80 in the container
+
+  # Authentication Service
+  authentication-service:
+    build:
+      context: ./../authentication-service
+      dockerfile: ./../authentication-service/authentication-service.dockerfile
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+
+    # PostgreSQL Database
+  postgres:
+    image: "postgres:14.2"
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
+
+  mongo:
+    image: "mongo:4.2.16-bionic"
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: logs
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./db-data/mongo/:/data/db
+
+  logger-service:
+    build:
+      context: ./../logger-service
+      dockerfile: ./../logger-service/logger-service.dockerfile
+    restart: always
+    ports:
+      - "8085:80"
+
+  mailhog:
+    image: "mailhog/mailhog:latest"
+    platform: linux/amd64
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  mail-service:
+    build:
+      context: ./../mail-service
+      dockerfile: ./../mail-service/mail-service.dockerfile
+    restart: always
+    environment:
+      MAIL_DOMAIN: localhost
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      FROM_NAME: "Gavin Cai"
+      FROM_ADDRESS: gavin.cai@example.com
