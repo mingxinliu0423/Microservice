@@ -26,16 +26,11 @@ type Config struct {
 func main() {
 	log.Println("Starting authentication service")
 
-	// TODO connect to DB
-
-	// Connect to the database
 	conn := connectToDB()
 	if conn == nil {
 		log.Panic("Can't connect to Postgres!")
 	}
 
-	// set up config
-	// Set up config
 	app := Config{
 		DB:     conn,
 		Models: data.New(conn),

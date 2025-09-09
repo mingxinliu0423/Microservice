@@ -70,5 +70,5 @@ services:
       MAIL_PORT: 1025
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
-      FROM_NAME: "Gavin Cai"
-      FROM_ADDRESS: gavin.cai@example.com
+      FROM_NAME: "Barry Liu"
+      FROM_ADDRESS: barryliu0423@gmail.com
